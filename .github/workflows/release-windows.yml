@@ -31,10 +31,14 @@ jobs:
       - name: Build installer with Inno Setup
         shell: pwsh
         run: |
-          choco install innosetup --no-progress -y
+          choco install innosetup --no-progress -y --force
           New-Item -ItemType Directory -Force -Path installer | Out-Null
           $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
-          & $iscc "${{ github.workspace }}\installer.iss"
+          Write-Host "Checking language files..."
+          Get-ChildItem "C:\Program Files (x86)\Inno Setup 6\Languages\" -ErrorAction SilentlyContinue
+          Write-Host "Running iscc..."
+          Set-Location "${{ github.workspace }}"
+          & $iscc "installer.iss"
 
       - name: Get version
         id: version
