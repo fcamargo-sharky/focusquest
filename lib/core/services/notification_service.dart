@@ -51,15 +51,12 @@ class NotificationService {
         );
       }
     } catch (e) {
-      // Permissions denied gracefully - app continues without notifications
       debugPrint('Notification permission: $e');
     }
   }
 
   Future<void> scheduleRoutineNotification(Routine routine) async {
     if (!routine.isActive) return;
-    // Routine notifications are shown as immediate reminders when the app is open
-    // Full scheduling requires timezone package which is not included
     debugPrint('Routine notification scheduled for: ${routine.title}');
   }
 
@@ -126,19 +123,11 @@ class NotificationService {
       const details = NotificationDetails(android: androidDetails, iOS: iosDetails);
 
       if (isBreak) {
-        await _plugin.show(
-          9999,
-          'Break Time! Great work!',
-          'You finished a Pomodoro! Take a well-deserved break.',
-          details,
-        );
+        await _plugin.show(9999, 'Break Time! Great work!',
+            'You finished a Pomodoro! Take a well-deserved break.', details);
       } else {
-        await _plugin.show(
-          9998,
-          'Back to Work!',
-          'Break is over. Time to focus again!',
-          details,
-        );
+        await _plugin.show(9998, 'Back to Work!',
+            'Break is over. Time to focus again!', details);
       }
     } catch (e) {
       debugPrint('Pomodoro notification error: $e');
