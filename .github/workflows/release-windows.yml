@@ -1,0 +1,63 @@
+name: Release Windows Installer
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Version tag (e.g. v1.0.0)'
+        required: true
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Windows
+        run: flutter build windows --release
+
+      - name: Build installer with Inno Setup
+        run: |
+          choco install innosetup --no-progress -y
+          iscc installer.iss
+
+      - name: Get version
+        id: version
+        shell: bash
+        run: |
+          TAG="${{ github.ref_name }}"
+          if [ -z "$TAG" ] || [ "$TAG" = "refs/heads/main" ]; then
+            TAG="${{ github.event.inputs.tag }}"
+          fi
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: FocusQuest ${{ steps.version.outputs.tag }}
+          draft: false
+          prerelease: false
+          files: installer/FocusQuest-Setup.exe
+          body: |
+            ## FocusQuest ${{ steps.version.outputs.tag }}
+
+            ### Instalación en Windows
+            1. Descarga `FocusQuest-Setup.exe`
+            2. Ejecuta el instalador
+            3. Sigue los pasos (no requiere permisos de administrador)
+
+            ### Versión Web
+            Disponible en: https://fcamargo-sharky.github.io/focusquest/
