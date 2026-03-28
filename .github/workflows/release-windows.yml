@@ -28,13 +28,13 @@ jobs:
       - name: Build Windows
         run: flutter build windows --release
 
-      - name: List build output
-        run: Get-ChildItem -Recurse build\windows\x64\runner\Release | Select-Object FullName
-
       - name: Build installer with Inno Setup
+        shell: pwsh
         run: |
           choco install innosetup --no-progress -y
-          iscc installer.iss
+          New-Item -ItemType Directory -Force -Path installer | Out-Null
+          $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+          & $iscc "${{ github.workspace }}\installer.iss"
 
       - name: Get version
         id: version
