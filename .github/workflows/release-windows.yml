@@ -28,6 +28,9 @@ jobs:
       - name: Build Windows
         run: flutter build windows --release
 
+      - name: List build output
+        run: Get-ChildItem -Recurse build\windows\x64\runner\Release | Select-Object FullName
+
       - name: Build installer with Inno Setup
         run: |
           choco install innosetup --no-progress -y
